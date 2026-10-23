@@ -5,12 +5,13 @@ $SavedUserPath = [Environment]::GetEnvironmentVariable('Path', 'User')
 $SavedPath = $env:Path
 $SavedDir = $env:GITSO_INSTALL_DIR
 $SavedVersion = $env:GITSO_VERSION
-$script:BadChecksum = $false
+$SavedBadChecksum = $env:GITSO_TEST_BAD_CHECKSUM
+$env:GITSO_TEST_BAD_CHECKSUM = '0'
 function Invoke-WebRequest {
     param($Uri, $OutFile, [switch]$UseBasicParsing, $TimeoutSec)
     if ($Uri -like '*/checksums.txt') {
         $Hash = (Get-FileHash -Algorithm SHA256 $Fixture).Hash.ToLowerInvariant()
-        if ($script:BadChecksum) { $Hash = '0' * 64 }
+        if ($env:GITSO_TEST_BAD_CHECKSUM -eq '1') { $Hash = '0' * 64 }
         @("$Hash  gitso_windows_amd64.exe", "$Hash  gitso_windows_arm64.exe") | Set-Content -Encoding ASCII -LiteralPath $OutFile
     } else { Copy-Item -LiteralPath $Fixture -Destination $OutFile }
 }
@@ -24,7 +25,7 @@ try {
     & $Installer
     $Entries = [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
     if (@($Entries | Where-Object { $_ -eq $env:GITSO_INSTALL_DIR }).Count -ne 1) { throw 'duplicate PATH entries' }
-    $script:BadChecksum = $true
+    $env:GITSO_TEST_BAD_CHECKSUM = '1'
     $Rejected = $false
     try { & $Installer } catch { $Rejected = $true }
     if (-not $Rejected) { throw 'bad checksum accepted' }
@@ -35,5 +36,6 @@ try {
     $env:Path = $SavedPath
     $env:GITSO_INSTALL_DIR = $SavedDir
     $env:GITSO_VERSION = $SavedVersion
+    $env:GITSO_TEST_BAD_CHECKSUM = $SavedBadChecksum
     if (Test-Path -LiteralPath $Root) { Remove-Item -LiteralPath $Root -Recurse -Force }
 }
