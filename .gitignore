@@ -3,6 +3,7 @@ gitso
 gitso.exe
 *.test
 coverage.out
+__pycache__/
 
 # ── 2. GoReleaser output ─────────────────
 dist/

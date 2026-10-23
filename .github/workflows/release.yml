@@ -1,0 +1,27 @@
+name: Release
+on:
+  push:
+    tags: ['v*.*.*']
+permissions:
+  contents: read
+jobs:
+  verify:
+    uses: ./.github/workflows/test.yml
+  release:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: sh scripts/build-release.sh
+      - name: Publish verified assets together
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/release/gitso_* dist/release/checksums.txt install.sh install.ps1 --verify-tag --generate-notes --draft
+          gh release edit "$RELEASE_TAG" --draft=false

@@ -53,27 +53,80 @@ GITSO_DEST=~/Projects gitso clone https://github.com/owner/repo.git
 
 ## 安装
 
-gitso 不通过包管理器或 GitHub Releases 分发，请从源码构建：
+用户无需安装 Go，也无需克隆 gitso 源码。运行时只依赖系统 Git。
+安装过程使用系统自带的 Shell 与下载工具，支持 macOS / Linux / Windows 的 amd64 和 arm64。
+
+### macOS 和 Linux
 
 ```bash
-git clone https://github.com/d3Lap1ace/gitso.git
-cd gitso
-go build -o gitso .
+curl -fsSL https://github.com/d3Lap1ace/gitso/releases/latest/download/install.sh | sh
 ```
 
-将生成的二进制安装到 `PATH`：
+默认安装到 `~/.local/bin/gitso`，无需 sudo。如该目录尚未加入 PATH，首次执行：
 
 ```bash
-sudo install -m 0755 gitso /usr/local/bin/gitso
+export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Windows PowerShell：
+将这行加入 `~/.zshrc`（zsh）或 `~/.bashrc`（bash），即可在之后的终端中使用。
+安装器需要 `curl` 和 `sha256sum` 或 `shasum`；这些工具只用于安装。
+
+### Windows PowerShell
 
 ```powershell
-git clone https://github.com/d3Lap1ace/gitso.git
-Set-Location gitso
-go build -o gitso.exe .
-.\gitso.exe --version
+irm https://github.com/d3Lap1ace/gitso/releases/latest/download/install.ps1 | iex
 ```
 
-如需全局使用，请将 `gitso.exe` 移动到已加入 `PATH` 的目录。
+默认安装到 `%LOCALAPPDATA%\Programs\gitso`，自动加入用户 PATH，无需管理员权限。
+当前 PowerShell 立即可用，其他终端请重新打开。
+
+### 让 Agent 安装
+
+将下面这段话发给 Codex 或其他可操作本机的 Agent：
+
+> 请按 https://github.com/d3Lap1ace/gitso 的安装说明，为当前用户安装 gitso。
+> 使用 GitHub Releases 预编译文件并验证 SHA256，不安装 Go，也不克隆源码。
+> 检查系统与芯片类型、Git 和 PATH。安装后运行 gitso --version，并告知安装路径和发布版本。
+
+Agent 与手动安装使用同一套安装器，不需要额外的 Agent 插件。
+
+### 指定目录或版本
+
+macOS / Linux：
+
+```bash
+curl -fsSL https://github.com/d3Lap1ace/gitso/releases/latest/download/install.sh -o /tmp/gitso-install.sh
+GITSO_VERSION=vX.Y.Z GITSO_INSTALL_DIR="$HOME/bin" sh /tmp/gitso-install.sh
+```
+
+Windows：先设置 `$env:GITSO_VERSION = "vX.Y.Z"` 和 `$env:GITSO_INSTALL_DIR`，再运行安装命令。
+将 `vX.Y.Z` 替换为已发布的实际版本号。重复运行安装器即可升级；指定旧版本即可回退。
+SHA256 校验用于检查下载完整性，不代替发布者签名。
+
+### 验证与卸载
+
+```bash
+gitso --version
+```
+
+gitso 会透明转发这个参数，因此显示的是 **Git 的版本**；安装器会另外输出 gitso 的发布版本与路径。
+macOS / Linux 可用 `command -v gitso` 检查 PATH，Windows 可用 `Get-Command gitso`。
+
+卸载时删除安装目录中的 `gitso` 或 `gitso.exe` 即可；已克隆的仓库不受影响。
+Windows 用户可同时从用户 PATH 中移除 `%LOCALAPPDATA%\Programs\gitso`。
+
+## 维护者构建和发布
+
+源码开发才需要 Go：
+
+```bash
+go test ./...
+go build -o gitso .
+sh scripts/build-release.sh
+```
+
+`build-release.sh` 构建六个平台文件及 `checksums.txt`。推送新的 `vX.Y.Z` 标签后，
+GitHub Actions 完成跨平台检查并发布预编译文件、校验文件及两种安装器。
+安装器先固定一个发布版本，再下载和校验文件；下载或校验失败时保留原安装。
+
+**启用条件：** 这些改动须先推送到 GitHub，再创建包含新安装器的 Release，上面的远程安装命令才会生效。
