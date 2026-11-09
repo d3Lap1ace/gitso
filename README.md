@@ -2,11 +2,13 @@
 
 English | [中文](./README.zh-CN.md)
 
-`gitso` is a transparent proxy for the system Git. It forwards every command and argument unchanged, except that `clone` without an explicit destination stores GitHub repositories under:
+`gitso` wraps the system Git and organizes GitHub clones by owner. For commands in the form `gitso clone [options] <github-url>`, it adds a destination under:
 
 ```text
 ~/Code/Github.com/<owner>/<repo>
 ```
+
+All other commands and arguments are passed through to Git. Authentication and repository operations use your existing Git setup.
 
 ## Preview
 
@@ -42,7 +44,15 @@ Set `GITSO_DEST` to change the organization root:
 GITSO_DEST=~/Projects gitso clone https://github.com/owner/repo.git
 ```
 
-Options should follow Git's documented clone syntax and appear before the repository URL.
+This stores the repository at `~/Projects/owner/repo`. To keep this setting across commands, add `export GITSO_DEST="$HOME/Projects"` to your shell configuration.
+
+### Automatic destination rules
+
+- `clone` must be the first argument, and the repository URL must be the last argument. Put clone options before the URL.
+- Supported GitHub URL forms include `https://github.com/owner/repo.git`, `git@github.com:owner/repo.git` and `ssh://git@github.com/owner/repo.git`. The `.git` suffix is optional.
+- Explicit destinations, non-GitHub remotes and GitHub Enterprise hosts are passed through to Git.
+- Git global options before `clone`, such as `gitso -C ~/Projects clone <url>`, are passed through without adding an automatic destination.
+- Parent directories are created automatically. If the destination already exists, Git determines whether cloning can proceed.
 
 ## Design
 
@@ -97,9 +107,24 @@ curl -fsSL https://github.com/d3Lap1ace/gitso/releases/latest/download/install.s
 GITSO_VERSION=vX.Y.Z GITSO_INSTALL_DIR="$HOME/bin" sh /tmp/gitso-install.sh
 ```
 
-On Windows, set `$env:GITSO_VERSION = "vX.Y.Z"` and `$env:GITSO_INSTALL_DIR` before running the installer.
+On Windows:
+
+```powershell
+$env:GITSO_VERSION = "vX.Y.Z"
+$env:GITSO_INSTALL_DIR = Join-Path $env:LOCALAPPDATA "Programs\gitso"
+irm https://github.com/d3Lap1ace/gitso/releases/latest/download/install.ps1 | iex
+```
+
 Replace `vX.Y.Z` with a published release. Run the installer again to upgrade, or pin an older release to roll back.
 SHA256 checks download integrity; it is not a publisher signature.
+
+| Variable | Purpose | Default |
+| --- | --- | --- |
+| `GITSO_DEST` | Root directory for automatically organized clones | `~/Code/Github.com` |
+| `GITSO_VERSION` | Release binary selected by the installer | `latest` |
+| `GITSO_INSTALL_DIR` | Absolute directory where the installer places the executable | `~/.local/bin` on macOS/Linux; `%LOCALAPPDATA%\Programs\gitso` on Windows |
+
+`GITSO_DEST` is read when running gitso; the other two variables are used only during installation.
 
 ### Verify and uninstall
 
@@ -115,16 +140,38 @@ Windows users can also remove `%LOCALAPPDATA%\Programs\gitso` from their user PA
 
 ## Build and release for maintainers
 
-Go is required only for source development:
+Source development requires Go 1.24.0 or newer; `go.mod` specifies the Go 1.24.6 toolchain. Build and run the existing Go tests from the repository root:
 
 ```bash
 go test ./...
 go build -o gitso .
+```
+
+On macOS/Linux, run the offline installer tests with Python 3:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+On Windows, build the installer fixture and run the PowerShell tests:
+
+```powershell
+go build -o "$env:TEMP\gitso-fixture.exe" .
+./tests/install_windows.ps1 -Fixture "$env:TEMP\gitso-fixture.exe"
+```
+
+Build release assets on macOS/Linux:
+
+```bash
 sh scripts/build-release.sh
 ```
 
-The build script produces six platform binaries and `checksums.txt`. Pushing a new `vX.Y.Z` tag triggers
-GitHub Actions to run platform checks and publish the binaries, checksums and both installers.
+The build script produces six platform binaries and `checksums.txt` in `dist/release/`.
+Pushing a new `vX.Y.Z` tag triggers GitHub Actions to run Go and installer checks on macOS, Linux and Windows, then publish the binaries, checksums and both installers.
 Each installer resolves a single release before downloading and verifying assets. Download or checksum failures preserve the previous install.
 
-**Activation:** Push these changes and create a release containing the new installers before the remote installation commands above can work.
+The remote installation commands require a published GitHub Release containing the installers, platform binaries and `checksums.txt`.
+
+## License
+
+[MIT](./LICENSE)
