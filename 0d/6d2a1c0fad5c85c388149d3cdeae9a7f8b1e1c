@@ -1,0 +1,29 @@
+README.md
+  s_67b85af8e0a94b::t_5f1235ebe1c96e 5,11-12,47-55,110-117,121-124,127-128,143,148-165,169-170,173-177
+  s_42b1a661a05c4f::t_bd2e27896c986a 125
+  s_67b85af8e0a94b::t_419a889077adde 126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "0d6d2a1c0fad5c85c388149d3cdeae9a7f8b1e1c",
+  "prompts": {},
+  "sessions": {
+    "s_42b1a661a05c4f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "01a1be43-332b-7af3-82dd-e5c4badb7831",
+        "model": "unknown"
+      },
+      "human_author": "lvhang <lvhang@xiaohongshu.net>"
+    },
+    "s_67b85af8e0a94b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1be43-332b-7af3-82dd-e5c4badb7831",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "lvhang <lvhang@xiaohongshu.net>"
+    }
+  }
+}
