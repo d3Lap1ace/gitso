@@ -2,17 +2,25 @@
 
 [English](./README.md) | 中文
 
-`gitso` 是系统 Git 的透明代理。除了一种情况外，所有命令和参数都会原样传给 Git：执行没有指定目标目录的 `clone` 时，GitHub 仓库会自动存入：
+`gitso` 是系统 Git 的透明代理。只传入一个 GitHub 仓库地址时，会自动执行 `clone`。执行没有指定目标目录的 `clone` 时，GitHub 仓库会自动存入：
 
 ```text
 ~/Code/Github.com/<owner>/<repo>
 ```
+
+其余命令和参数都会原样传给 Git。
 
 ## 效果图
 
 ![按 GitHub owner 分类存储仓库](./img/render_ch.png)
 
 ## 使用方法
+
+直接传入 GitHub 仓库地址即可克隆：
+
+```bash
+gitso git@github.com:NousResearch/hermes-agent.git
+```
 
 按照正常 Git 语法，把 `git` 换成 `gitso`：
 

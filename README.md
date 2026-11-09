@@ -8,13 +8,19 @@ English | [中文](./README.zh-CN.md)
 ~/Code/Github.com/<owner>/<repo>
 ```
 
-All other commands and arguments are passed through to Git. Authentication and repository operations use your existing Git setup.
+A GitHub URL supplied as the only argument is shorthand for `gitso clone <github-url>`. All other commands and arguments are passed through to Git. Authentication and repository operations use your existing Git setup.
 
 ## Preview
 
 ![GitHub repositories organized by owner](./img/render_en.png)
 
 ## Usage
+
+Clone a GitHub repository directly:
+
+```bash
+gitso git@github.com:NousResearch/hermes-agent.git
+```
 
 Use normal Git syntax, replacing `git` with `gitso`:
 

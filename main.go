@@ -28,6 +28,11 @@ func main() {
 }
 
 func rewriteClone(args []string) ([]string, error) {
+	if len(args) == 1 {
+		if _, _, ok := githubRepo(args[0]); ok {
+			args = append([]string{"clone"}, args...)
+		}
+	}
 	if len(args) < 2 || args[0] != "clone" {
 		return args, nil
 	}
