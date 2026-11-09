@@ -1,0 +1,25 @@
+main.go
+  s_419b7e425c97d7::t_8e715ec9070ad4 31-35
+README.md
+  s_419b7e425c97d7::t_8e715ec9070ad4 11,19-23
+  s_419b7e425c97d7::t_0a8c59cb62dacd 24
+README.zh-CN.md
+  s_419b7e425c97d7::t_8e715ec9070ad4 5,11-12,19-23
+  s_419b7e425c97d7::t_552cb8ca00e237 24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "9ba060530bcc5714b1c9ca7607032da2ac7cea85",
+  "prompts": {},
+  "sessions": {
+    "s_419b7e425c97d7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1be4f-7fe6-7a72-b382-50d9dd762305",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "lvhang <lvhang@xiaohongshu.net>"
+    }
+  }
+}
